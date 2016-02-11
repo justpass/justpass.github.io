@@ -1,1 +1,263 @@
-<h2>hi</h2>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self' https://www.random.org; font-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'">
+<title>JustPass</title>
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="stylesheet" href="css/pure-min.css">
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/main.css">
+<script src="js/vue.min.js"></script>
+<script src="js/uuid.js"></script>
+<script src="js/aes.js"></script>
+<script src="js/md5.js"></script>
+<script src="js/clipboard.min.js"></script>
+</head>
+<body id="justpass">
+<div class="passphrase {{ openStatus }}">
+    <div class="inner">
+        <div class="logo">
+            <img src="image/logo.png">
+        </div>
+        <input type="password" id="passphrase" v-model="passphrase" @keydown="checkEnter( $event )">
+        <i class="fa fa-arrow-circle-right" @click="open()"></i>
+    </div>
+</div>
+<div class="content pure-g">
+    <div id="nav" class="pure-u">
+        <div class="title">JustPass</div>
+        <div class="pure-menu menu">
+            <div class="scroll">
+                <ul class="pure-menu-list">
+                    <li class="pure-menu-item"><a class="pure-menu-link {{ group === 'all' ? 'active' : '' }}" href="#All" @click="showItems( 'all' )">All Items</a></li>
+                    <li class="pure-menu-item"><a class="pure-menu-link {{ group === 'flag' ? 'active' : '' }}" href="#Flag" @click="showItems( 'flag' )">Flag</a></li>
+                    <li class="pure-menu-heading">Labels</li>
+                    <li class="pure-menu-item"><a href="#Red" @click="showItems( 'red' )" class="pure-menu-link {{ group === 'red' ? 'active' : '' }}"><span class="label label-red"></span>Red</a></li>
+                    <li class="pure-menu-item"><a href="#Orange" @click="showItems( 'orange' )" class="pure-menu-link {{ group === 'oragne' ? 'active' : '' }}"><span class="label label-orange"></span>Orange</a></li>
+                    <li class="pure-menu-item"><a href="#Yellow" @click="showItems( 'yellow' )" class="pure-menu-link {{ group === 'yellow' ? 'active' : '' }}"><span class="label label-yellow"></span>Yellow</a></li>
+                    <li class="pure-menu-item"><a href="#Green" @click="showItems( 'green' )" class="pure-menu-link {{ group === 'green' ? 'active' : '' }}"><span class="label label-green"></span>Green</a></li>
+                    <li class="pure-menu-item"><a href="#Blue" @click="showItems( 'blue' )" class="pure-menu-link {{ group === 'blue' ? 'active' : '' }}"><span class="label label-blue"></span>Blue</a></li>
+                    <li class="pure-menu-item"><a href="#Purple" @click="showItems( 'purple' )" class="pure-menu-link {{ group === 'purple' ? 'active' : '' }}"><span class="label label-purple"></span>Purple</a></li>
+                    <li class="pure-menu-item"><a href="#Gray" @click="showItems( 'gray' )" class="pure-menu-link {{ group === 'gray' ? 'active' : '' }}"><span class="label label-gray"></span>Gray</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="list" class="pure-u-1">
+        <div class="search">
+            <input type="text" placeholder="Search" v-model="keyword">
+        </div>
+        <div class="list">
+            <div class="scroll">
+                <div class="item {{ itemId === id ? 'active' : '' }}" v-for="(itemId, item) in keychain | searchItem keyword | orderBy 'sortableTitle'" @click="viewItem( itemId )">
+                    <div class="icon pure-u">
+                        <img :src="'image/' + item.avatar + '.png'">
+                    </div>
+                    <div class="pure-u-3-4">
+                        <div class="title">{{ item.title }}</div>
+                        <div class="account">{{ item.account }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="main" class="pure-form pure-u-1">
+        <div class="action">
+            <i class="fa fa-flag-o {{ actionDisabled }}" title="Flag" @click="setFlag()"></i>
+            <i class="fa fa-trash-o {{ actionDisabled }}" title="Remove" @click="remove()"></i>
+            <i class="fa fa-pencil-square-o {{ actionDisabled }}" title="Edit" @click="edit()"></i>
+            <i class="fa fa-times {{ view === '' ? 'disabled' : '' }}" title="Close" @click="close()"></i>
+            <i class="fa fa-plus" title="New" @click="addNew()"></i>
+            <i class="fa fa-cog right" title="Settings" @click="settings()"></i>
+        </div>
+        <div class="view">
+            <div id="view" v-show="view === 'item'">
+                <div class="pure-g headline">
+                    <div class="pure-u-1-2 title avatar">
+                        <img :src="'image/' + keychain[id].avatar + '.png'">
+                    </div>
+                    <div class="pure-u-1-2 value">
+                        <h2>{{ keychain[id].title }}</h2>
+                        <div>
+                            <i class="fa fa-flag-o gray" v-if="!keychain[id].flag"></i>
+                            <i class="fa fa-flag red" v-if="keychain[id].flag"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="pure-g">
+                    <div class="pure-u-1-2 title">Account</div>
+                    <div class="pure-u-1-2 value">{{ keychain[id].account }}</div>
+                </div>
+                <div class="pure-g margin">
+                    <div class="pure-u-1-2 title">Password</div>
+                    <div class="pure-u-1-2 value" v-if="!isAppleMobile()">{{{ hiddenKey }}}</div>
+                    <div class="pure-u-1-2 value" v-if="isAppleMobile()">{{ keychain[id].key }}</div>
+                </div>
+                <div class="pure-g margin" v-if="!isAppleMobile()">
+                    <div class="pure-u-1-2 title"></div>
+                    <div class="pure-u-1-2 value">
+                        <span class="tooltips" @mouseleave="tooltip = ''">
+                            <button id="passwordClipboard" class="pure-button"><i class="fa fa-clipboard"></i> Copy Password</button>
+                            <span v-show="tooltip !== ''">{{{ tooltip }}}</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="pure-g {{ keychain[id].labels.length > 0 ? '' : 'margin' }}" v-show="keychain[id].website !== ''">
+                    <div class="pure-u-1-2 title">Website</div>
+                    <div class="pure-u-1-2 value"><a href="{{ keychain[id].website }}" target="_blank">{{ keychain[id].website }}</a></div>
+                </div>
+                <div class="pure-g margin" v-if="keychain[id].labels.length > 0">
+                    <div class="pure-u-1-2 title">Labels</div>
+                    <div class="pure-u-1-2 value">
+                        <span v-for="label in keychain[id].labels" class="label label-{{ label }}"></span>
+                    </div>
+                </div>
+                <div class="pure-g">
+                    <div class="pure-u-1-2 title">Last Modified</div>
+                    <div class="pure-u-1-2 value">{{ keychain[id].modifiedDate }}</div>
+                </div>
+                <div class="pure-g">
+                    <div class="pure-u-1-2 title">Created</div>
+                    <div class="pure-u-1-2">{{ keychain[id].createdDate }}</div>
+                </div>
+            </div>
+            <div id="new" v-show="view === 'new'">
+                <fieldset class="avatar">
+                    <img :src="'image/' + currentAvatar + '.png'" @click="showAvatar = true">
+                </fieldset>
+                <fieldset>
+                    <input type="text" class="pure-input-1" placeholder="Title" v-model="title">
+                    <input type="text" class="pure-input-1" placeholder="Account" v-model="account">
+                    <input type="text" class="pure-input-1" placeholder="Website" v-model="website">
+                    <div class="pure-g">
+                         <div class="pure-u-3-4">
+                            <input type="text" class="pure-input-1" placeholder="Password" v-model="key">
+                         </div>
+                         <div class="pure-u-1-4 generate-button">
+                            <button class="pure-button pure-button-{{ generateStatus }}" @click="generate()">Generate</button>
+                         </div>
+                     </div>
+                </fieldset>
+                <fieldset>
+                    <input id="label-red" type="checkbox" class="label" value="red" v-model="labels">
+                    <label for="label-red" class="label label-red">
+                        <i class="fa fa-square"></i>
+                        <i class="fa fa-check-square"></i>
+                    </label>
+                    <input id="label-orange" type="checkbox" class="label" value="orange" v-model="labels">
+                    <label for="label-orange"class="label label-orange">
+                        <i class="fa fa-square"></i>
+                        <i class="fa fa-check-square"></i>
+                    </label>
+                    <input id="label-yellow" type="checkbox" class="label" value="yellow" v-model="labels">
+                    <label for="label-yellow"class="label label-yellow">
+                        <i class="fa fa-square"></i>
+                        <i class="fa fa-check-square"></i>
+                    </label>
+                    <input id="label-green" type="checkbox" class="label" value="green" v-model="labels">
+                    <label for="label-green" class="label label-green">
+                        <i class="fa fa-square"></i>
+                        <i class="fa fa-check-square"></i>
+                    </label>
+                    <input id="label-blue" type="checkbox" class="label" value="blue" v-model="labels">
+                    <label for="label-blue"class="label label-blue">
+                        <i class="fa fa-square"></i>
+                        <i class="fa fa-check-square"></i>
+                    </label>
+                    <input id="label-purple" type="checkbox" class="label" value="purple" v-model="labels">
+                    <label for="label-purple"class="label label-purple">
+                        <i class="fa fa-square"></i>
+                        <i class="fa fa-check-square"></i>
+                    </label>
+                    <input id="label-gray" type="checkbox" class="label" value="gray" v-model="labels">
+                    <label for="label-gray"class="label label-gray">
+                        <i class="fa fa-square"></i>
+                        <i class="fa fa-check-square"></i>
+                    </label>
+                </fieldset>
+                <fieldset>
+                    <label for="digit" class="pure-checkbox">
+                        <input type="checkbox" id="digit" v-model="rule" value="digit"> Digit
+                    </label>
+                    <label for="lower_alpha" class="pure-checkbox">
+                        <input type="checkbox" id="lower_alpha" v-model="rule" value="lower_alpha"> Lowercase Alpha
+                    </label>
+                    <label for="upper_alpha" class="pure-checkbox">
+                        <input type="checkbox" id="upper_alpha" v-model="rule" value="upper_alpha"> Uppercase Alpha
+                    </label>
+                    <label for="symbol" class="pure-checkbox">
+                        <input type="checkbox" id="symbol" v-model="rule" value="symbol"> Symbol
+                    </label>
+                    <label for="length">
+                        <input type="range" id="length" v-model="length" min="6" max="50"> {{ length }}
+                    </label>
+                </fieldset>
+                <fieldset class="new-button">
+                    <button class="pure-button pure-button-{{ saveStatus }}" @click="save()">Save</button>
+                </fieldset>
+            </div>
+            <div id="settings" v-show="view === 'settings'">
+                <fieldset>
+                    <h2>Master Password</h2>
+                    <div class="pure-g">
+                        <div class="pure-u-1-2 title">Old Password</div>
+                        <div class="pure-u-1-2 value">
+                            <input type="password" class="pure-input-1" v-model="oldPassword" @keydown="savePassword( $event )">
+                        </div>
+                    </div>
+                    <div class="pure-g">
+                        <div class="pure-u-1-2 title">New Password</div>
+                        <div class="pure-u-1-2 value">
+                            <input type="password" class="pure-input-1" v-model="newPassword" @keydown="savePassword( $event )">
+                        </div>
+                    </div>
+                    <div class="pure-g margin">
+                        <div class="pure-u-1-2 title">Confirm Password</div>
+                        <div class="pure-u-1-2 value">
+                            <input type="password" class="pure-input-1" v-model="confirmPassword" @keydown="savePassword( $event )">
+                        </div>
+                    </div>
+                    <div class="pure-g margin">
+                        <div class="pure-u-1-2 title"></div>
+                        <div class="pure-u-1-2 value">
+                            <button class="pure-button pure-button-primary" @click="savePassword()">Save</button>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <h2>Export / Import</h2>
+                    <div class="onlyButton">
+                        <button class="pure-button" @click="exportData()">Export</button>
+                        <label for="import" class="pure-button">Import</label>
+                        <input id="import" type="file" @change="importData()" accept="text/xml">
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="mask" v-show="message !== ''"></div>
+<div id="avatar" v-show="showAvatar">
+    <div class="list">
+        <div class="scroll">
+            <img v-for="avatar in avatars" :src="'image/' + avatar + '.png'" class="{{ currentAvatar === avatar ? 'selected' : '' }}" @click="setAvatar( avatar )">
+        </div>
+        <div class="button">
+            <button class="pure-button" @click="showAvatar = false">Close</button>
+        </div>
+    </div>
+</div>
+<div id="message">
+    <div class="message {{ message ? 'show' : '' }}">
+        <div class="text">{{ message }}</div>
+        <div>
+            <button v-show="messagebox === 'confirm'" class="pure-button pure-button-primary" @click="confirm()">Yes</button>
+            <button id="messageNO" v-show="messagebox === 'confirm'" class="pure-button" @click="closeMessage()" @keydown="closeMessage( $event )">No</button>
+            <button id="messageOK" v-show="messagebox !== 'confirm'" class="pure-button pure-button-primary" @click="closeMessage()" @keydown="closeMessage( $event )">OK</button>
+        </div>
+    </div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>
