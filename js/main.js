@@ -167,6 +167,7 @@ var app = new Vue({
             }
             var keychain = this.keychain[this.id];
             keychain.flag = !keychain.flag;
+            localStorage[this.id] = crypteCode( keychain, this.passphrase );
             Vue.set( this.keychain, this.id, keychain );
         },
         isAppleMobile: function() {
