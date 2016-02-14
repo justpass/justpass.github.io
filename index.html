@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self' https://www.random.org; font-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'">
 <title>JustPass</title>
 <link rel="canonical" href="https://justpass.github.io">
@@ -45,9 +46,17 @@
             </div>
         </div>
     </div>
-    <div id="list" class="pure-u-1">
+    <div id="list" class="pure-u-1 {{ view ? 'remove' : '' }}">
         <div class="search">
             <input type="text" placeholder="Search" v-model="keyword">
+        </div>
+        <div class="action">
+            <i class="fa fa-flag-o {{ actionDisabled }}" title="Flag" @click="setFlag()"></i>
+            <i class="fa fa-trash-o {{ actionDisabled }}" title="Remove" @click="remove()"></i>
+            <i class="fa fa-pencil-square-o {{ actionDisabled }}" title="Edit" @click="edit()"></i>
+            <i class="fa fa-times {{ view === '' ? 'disabled' : '' }}" title="Close" @click="close()"></i>
+            <i class="fa fa-plus" title="New" @click="addNew()"></i>
+            <i class="fa fa-cog" title="Settings" @click="settings()"></i>
         </div>
         <div class="list">
             <div class="scroll">
@@ -63,7 +72,7 @@
             </div>
         </div>
     </div>
-    <div id="main" class="pure-form pure-u-1">
+    <div id="main" class="pure-form pure-u-1 {{ view ? '' : 'remove' }}">
         <div class="action">
             <i class="fa fa-flag-o {{ actionDisabled }}" title="Flag" @click="setFlag()"></i>
             <i class="fa fa-trash-o {{ actionDisabled }}" title="Remove" @click="remove()"></i>

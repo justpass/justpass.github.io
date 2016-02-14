@@ -17,7 +17,7 @@ body {
     height: 100%;
     width: 150px;
     background: #252a3a;
-    position: fixed;
+    position: absolute;
     top: 0;
     bottom: 0;
     margin-left: -500px;
@@ -112,7 +112,7 @@ body {
     width: 350px;
     height: 100%;
     border-right: 1px solid #ddd;
-    position: fixed;
+    position: absolute;
     background: #f8f8f8;
 }
 
@@ -128,10 +128,15 @@ body {
     line-height: 32px;
     font-size: 18px;
     box-sizing: border-box;
+    -webkit-appearance: none;
     border: none;
     outline: none;
     background: transparent;
     border-bottom: 1px solid #ddd;
+}
+
+#list .action {
+    display: none;
 }
 
 #list .list {
@@ -182,7 +187,6 @@ body {
 
 #main {
     height: 100%;
-    min-width: 502px;
 }
 
 #main .view {
@@ -218,6 +222,7 @@ body {
 }
 
 #main input[type="text"] {
+    -webkit-appearance: none;
     border: none;
     border-radius: 0;
     border-bottom: 1px solid #ccc;
@@ -248,6 +253,7 @@ body {
 }
 
 #new .pure-g input[type="text"] {
+    -webkit-appearance: none;
     border: none;
 }
 
@@ -319,6 +325,7 @@ body {
     width: 360px;
     padding: 0 20px;
     font-size: 36px;
+    -webkit-appearance: none;
     border: none;
     border-bottom: 2px solid #fff;
     outline: none;
@@ -566,7 +573,7 @@ span:hover.tooltips span {
 #mask {
     width: 100%;
     height: 100%;
-    position: fixed;
+    position: absolute;
     top: 0;
     z-index: 300;
 }
@@ -574,7 +581,7 @@ span:hover.tooltips span {
 #message {
     width: 100%;
     height: 0%;
-    position: fixed;
+    position: absolute;
     top: 0;
     z-index: 500;
 }
@@ -605,10 +612,10 @@ span:hover.tooltips span {
 }
 
 #avatar {
-    position: fixed;
+    position: absolute;
     height: 100%;
     width: 100%;
-    position: fixed;
+    position: absolute;
     top: 0;
     padding: 2em 5em;
     z-index: 400;
@@ -678,6 +685,7 @@ span:hover.tooltips span {
 }
 
 #settings input[type="password"] {
+    -webkit-appearance: none;
     border: none;
     border-radius: 0;
     border-bottom: 1px solid #ccc;
@@ -700,4 +708,73 @@ span:hover.tooltips span {
 
 #settings .onlyButton {
     margin-left: 5em;
+}
+
+/* iPad */
+@media screen and (max-width: 1023px) and (min-width: 768px) {
+    .content {
+        padding-left: 150px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #nav {
+        margin-left: -150px;
+    }
+
+    #list {
+        position: static;
+        margin-left: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #list.remove {
+        display: none;
+    }
+
+    #list .search {
+        display: none;
+    }
+
+    #list .action {
+        display: block;
+        height: 42px;
+        background: #f8f8f8;
+        border-bottom: 1px solid #ddd;
+        box-sizing: border-box;
+    }
+
+    #list .action .fa {
+        line-height: 32px;
+        font-size: 24px;
+        margin: 5px 30px;
+        display: inline-block;
+        color: #0078e7;
+        cursor: pointer;
+    }
+
+    #list .action .fa.disabled {
+        color: #95c0e7;
+        cursor: default;
+    }
+
+    #list .list {
+        position: static;
+    }
+
+    #main .action .right {
+        float: none;
+    }
+
+    #main.remove {
+        display: none;
+    }
+}
+
+/* Phone */
+@media screen and (max-width: 767px) {
+    #list {
+        width: 100%;
+    }
 }
