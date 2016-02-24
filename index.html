@@ -129,7 +129,7 @@
                 </div>
                 <div class="pure-g">
                     <div class="pure-u-1-2 title">Created</div>
-                    <div class="pure-u-1-2">{{ keychain[id].createdDate }}</div>
+                    <div class="pure-u-1-2 value">{{ keychain[id].createdDate }}</div>
                 </div>
             </div>
             <div id="new" v-show="view === 'new'">
@@ -199,7 +199,7 @@
                     <label for="symbol" class="pure-checkbox">
                         <input type="checkbox" id="symbol" v-model="rule" value="symbol"> Symbol
                     </label>
-                    <label for="length">
+                    <label for="length" class="range">
                         <input type="range" id="length" v-model="length" min="6" max="50"> {{ length }}
                     </label>
                 </fieldset>
@@ -237,10 +237,21 @@
                 </fieldset>
                 <fieldset>
                     <h2>Export / Import</h2>
-                    <div class="onlyButton">
-                        <button class="pure-button" @click="exportData()">Export</button>
-                        <label for="import" class="pure-button">Import</label>
-                        <input id="import" type="file" @change="importData()" accept="text/xml">
+                    <div class="pure-g margin">
+                        <div class="pure-u-1-2 title">Export as:</div>
+                        <div class="pure-u-1-2 value">
+                            <button class="pure-button" @click="exportData()">XML</button>
+                            <button class="pure-button" @click="exportImg()">PNG</button>
+                        </div>
+                    </div>
+                    <div class="pure-g margin">
+                        <div class="pure-u-1-2 title">Import from:</div>
+                        <div class="pure-u-1-2 value">
+                            <label for="import" class="pure-button">XML</label>
+                            <input id="import" type="file" @change="importData()" accept="text/xml">
+                            <label for="importImg" class="pure-button">PNG</label>
+                            <input id="importImg" type="file" @change="importImg()" accept="image/png">
+                        </div>
                     </div>
                 </fieldset>
             </div>

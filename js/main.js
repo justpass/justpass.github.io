@@ -5,6 +5,16 @@ var generateBusy = false;
 
 var clipboard = new Clipboard('#passwordClipboard');
 
+var backupPNG = 'iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAMFBMVEUAder////' +
+                'w9/5+u/W/3vpcqvM6mPDg7/0oj+8Th+2ezPiv1PrP5vxLoPKOw/dtsvUGWXKKAA' +
+                'ABG0lEQVRIx2MYBaMAJ2A2BgIDPAoYBYFAAY8CFpACBzwKuEEKHuBzA0hBAB4Fv' +
+                'CAFCXgUsIEU4JJcNQFIAOXFgRSnDRYFilIJQEJQUAQov1BwAjbTRRIYHAUFhRnY' +
+                'gOQHDAV8gkAVFx4KCsqyFgKZGzAUsAuC7AfqlVbEHpwTBVGAGIaCj6gKhDEUOKI' +
+                'qkMFQgCqPGVycWxSRpYW8MQOCoe0zVJGLcRqu4D4I1t2AM654IOZr4JLnANqA14' +
+                'gmkCwonNXwGCAViDtRBYGkJMFxIopNnhVs/wIghcOISWD3TWAoBNGy2JxwEBJHY' +
+                'EdgzV1ckGQAckQFAy5XGoDdIocroA4KgahCIZw5gwvsvcANuDPOBXD2YhgFowAX' +
+                'AAC++S7crZ6ECQAAAABJRU5ErkJggg==';
+
 clipboard.on( 'success', function( e ) {
     app.tooltip = 'Copied!'
 
@@ -143,7 +153,9 @@ var app = new Vue({
             this.$set( 'actionDisabled', '' );
             this.$set( 'hiddenKey', new Array( this.keychain[id].key.length + 1 ).join( '&bull;' ) );
             this.$set( 'view', 'item' );
-            document.getElementById( 'passwordClipboard' ).setAttribute( 'data-clipboard-text', this.keychain[id].key );
+            if ( document.getElementById( 'passwordClipboard' ) ) {
+                document.getElementById( 'passwordClipboard' ).setAttribute( 'data-clipboard-text', this.keychain[id].key );
+            }
         },
         edit: function() {
             if ( this.actionDisabled === 'disabled' ) {
@@ -188,7 +200,7 @@ var app = new Vue({
                 Vue.delete( scope.keychain, scope.id );
                 scope.$set( 'id', '' );
                 scope.$set( 'actionDisabled', 'disabled' );
-                scope.message = '';
+                scope.$set( 'message', '' );
             };
             scope.$set( 'messagebox', 'confirm' );
             scope.$set( 'message', 'Are you sure you want to remove this account?' );
@@ -284,35 +296,7 @@ var app = new Vue({
                 return;
             } else {
                 fileReader.onload = function( e ) {
-                    if ( !DOMParser ) {
-                        scope.upgradeBrowser();
-                        return;
-                    }
-                    var xml = new DOMParser().parseFromString( e.target.result, 'text/xml' );
-                    var importIdentification = xml.getElementsByTagName( 'identification' )[0].childNodes[0].nodeValue;
-                    if ( localStorage.identification && importIdentification !== localStorage.identification ) {
-                        scope.$set( 'messagebox', '' );
-                        scope.$set( 'message', 'Your current master password can not decrypt this keychain.' );
-                        setTimeout( function() {
-                            document.getElementById( 'messageOK' ).focus();
-                        }, 0 );
-                        return;
-                    } else if ( !localStorage.identification ) {
-                        localStorage.identification = importIdentification;
-                    }
-                    var items = xml.getElementsByTagName( 'item' );
-                    for ( var index = 0, len = items.length; index < len; index++ ) {
-                        var id = items[index].getElementsByTagName( 'id' )[0].childNodes[0].nodeValue;
-                        var value = items[index].getElementsByTagName( 'value' )[0].childNodes[0].nodeValue;
-                        localStorage[id] = value;
-                        
-                    }
-                    decryptCode( scope.passphrase );
-                    scope.$set( 'messagebox', '' );
-                    scope.$set( 'message', 'Import keychain succeed.' );
-                    setTimeout( function() {
-                        document.getElementById( 'messageOK' ).focus();
-                    }, 0 );
+                    scope.readImportXML( e.target.result );
                 }
                 fileReader.readAsText( importFile );
             }
@@ -324,6 +308,74 @@ var app = new Vue({
             setTimeout( function() {
                 document.getElementById( 'messageOK' ).focus();
             }, 0 );
+        },
+        readImportXML: function( xml ) {
+            if ( !DOMParser ) {
+                this.upgradeBrowser();
+                return;
+            }
+            xml = new DOMParser().parseFromString( xml, 'text/xml' );
+            var importIdentification = xml.getElementsByTagName( 'identification' )[0].childNodes[0].nodeValue;
+            if ( localStorage.identification && importIdentification !== localStorage.identification ) {
+                this.$set( 'messagebox', '' );
+                this.$set( 'message', 'Your current master password can not decrypt this keychain.' );
+                setTimeout( function() {
+                    document.getElementById( 'messageOK' ).focus();
+                }, 0 );
+                return;
+            } else if ( !localStorage.identification ) {
+                localStorage.identification = importIdentification;
+            }
+            var items = xml.getElementsByTagName( 'item' );
+            for ( var index = 0, len = items.length; index < len; index++ ) {
+                var id = items[index].getElementsByTagName( 'id' )[0].childNodes[0].nodeValue;
+                var value = items[index].getElementsByTagName( 'value' )[0].childNodes[0].nodeValue;
+                localStorage[id] = value;
+                        
+            }
+            decryptCode( this.passphrase );
+            this.$set( 'messagebox', '' );
+            this.$set( 'message', 'Import keychain succeed.' );
+            setTimeout( function() {
+                document.getElementById( 'messageOK' ).focus();
+            }, 0 );
+        },
+        exportImg: function() {
+            var scope = this;
+            var raw = atob( backupPNG );
+            var rawLength = raw.length
+            var backup = new Uint8Array( raw.length );
+            for ( var i = 0; i < rawLength; i++ ) {
+                backup[i] = raw.charCodeAt( i );
+            }
+            var blob = new Blob( [backup, scope.getKeychainXML()], {type: 'image/png'} );
+            var imgReader = new FileReader();
+            imgReader.onload = function() {
+                scope.confirm = function() {
+                    window.open( imgReader.result );
+                    scope.$set( 'message', '' );
+                }
+                scope.$set( 'messagebox', 'confirm' );
+                scope.$set( 'message', 'You will see an image, save and import it on another device.' );
+            }
+            imgReader.readAsDataURL( blob );
+        },
+        importImg: function() {
+            var scope = this;
+            var importFile = document.getElementById( 'importImg' ).files[0];
+            var fileReader = new FileReader();
+            if ( !fileReader ) {
+                document.getElementById( 'importImg' ).value = '';
+                scope.upgradeBrowser();
+                return;
+            } else {
+                fileReader.onload = function( e ) {
+                    var buffer = new Uint8Array( fileReader.result, 400 );
+                    scope.readImportXML( String.fromCharCode.apply(null, buffer) );
+                }
+                fileReader.readAsArrayBuffer( importFile );
+            }
+            document.getElementById( 'importImg' ).value = '';
         },
     },
     watch: {

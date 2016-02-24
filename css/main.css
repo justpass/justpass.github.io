@@ -4,7 +4,6 @@ html, body {
 
 body {
     line-height: 1.6;
-    font-family: Raleway;
     overflow-y: hidden;
 }
 
@@ -602,7 +601,7 @@ span:hover.tooltips span {
 }
 
 #message .message .text {
-    height: 1em;
+    min-height: 1em;
     margin-bottom: 1em;
     cursor: default;
 }
@@ -702,7 +701,8 @@ span:hover.tooltips span {
     margin: 0;
 }
 
-#import {
+#import,
+#importImg {
     display: none;
 }
 
@@ -774,7 +774,118 @@ span:hover.tooltips span {
 
 /* Phone */
 @media screen and (max-width: 767px) {
-    #list {
+    .content {
+        padding-left: 0;
         width: 100%;
+        box-sizing: border-box;
+    }
+
+    #nav {
+        display: none;
+    }
+
+    #list {
+        position: static;
+        margin-left: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #list.remove {
+        display: none;
+    }
+
+    #list .search {
+        display: none;
+    }
+
+    #list .action {
+        display: block;
+        height: 42px;
+        background: #f8f8f8;
+        border-bottom: 1px solid #ddd;
+        box-sizing: border-box;
+    }
+
+    #list .action .fa {
+        line-height: 32px;
+        font-size: 24px;
+        margin: 5px 30px;
+        display: inline-block;
+        color: #0078e7;
+        cursor: pointer;
+    }
+
+    #list .action .fa.disabled {
+        color: #95c0e7;
+        cursor: default;
+    }
+
+    #list .list {
+        position: static;
+    }
+
+    #main .action .right {
+        float: none;
+    }
+
+    #main.remove {
+        display: none;
+    }
+
+    #view {
+        padding: 1em;
+    }
+
+    #view .pure-g {
+        width: auto;
+    }
+
+    #view .pure-u-1-2 {
+        width: 100%;
+    }
+
+    #view .headline {
+        margin-left: -37.5%;
+     }
+
+    #view .headline .pure-u-1-2 {
+        width: 50%;
+    }
+
+    #view :not(.headline) .title {
+        text-align: left;
+        padding: 0;
+    }
+
+    #view :not(.headline) .value {
+        padding-left: 5em;
+    }
+
+    .action .fa {
+        margin: 5px 14px!important;
+    }
+
+    #new {
+        padding: 1em;
+    }
+
+    #new fieldset {
+        width: auto;
+        margin: 0;
+    }
+
+    #new label.label {
+        display: inline-block;
+        font-size: 24px;
+        margin-left: 0.2em;
+    }
+
+    #new input[type="range"] {
+        width: 100%;
+    }
+
+    #new .range {
+        text-align: right;
     }
 }
