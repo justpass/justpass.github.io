@@ -348,7 +348,9 @@ var app = new Vue({
             for ( var i = 0; i < rawLength; i++ ) {
                 backup[i] = raw.charCodeAt( i );
             }
-            var blob = new Blob( [backup, scope.getKeychainXML()], {type: 'image/png'} );
+            var blob = new Blob( [backup,
+                    getHexFromIdentification( localStorage.identification ),
+                    getBufferFromString( atob( CryptoJS.AES.encrypt( scope.getKeychainXML(), scope.passphrase ).toString() ) )], {type: 'image/png'} );
             var imgReader = new FileReader();
             imgReader.onload = function() {
                 scope.confirm = function() {
@@ -370,8 +372,21 @@ var app = new Vue({
                 return;
             } else {
                 fileReader.onload = function( e ) {
-                    var buffer = new Uint8Array( fileReader.result, 400 );
-                    scope.readImportXML( String.fromCharCode.apply(null, buffer) );
+                    var buffer = new Uint8Array( fileReader.result, 400, 16 );
+                    var identification = getIdentificationFromHex( buffer );
+                    if ( identification !== localStorage.identification ) {
+                        scope.$set( 'messagebox', '' );
+                        scope.$set( 'message', 'Your current master password can not decrypt this keychain.' );
+                        setTimeout( function() {
+                            document.getElementById( 'messageOK' ).focus();
+                        }, 0 );
+                        return;
+                    } else {
+                        buffer = new Uint8Array( fileReader.result, 416 );
+                        var xml = String.fromCharCode.apply( null, buffer );
+                        xml = CryptoJS.AES.decrypt( btoa( xml ), scope.passphrase ).toString( CryptoJS.enc.Utf8 );
+                        scope.readImportXML( xml );
+                    }
                 }
                 fileReader.readAsArrayBuffer( importFile );
             }
@@ -464,6 +479,36 @@ function getIdentification( passphrase ) {
         passphrase = CryptoJS.MD5( passphrase );
     }
     return passphrase;
+}
+
+function getHexFromIdentification( identification ) {
+    var hex = new Uint8Array( 16 );
+    for ( var i = 0; i < 16; i ++ ) {
+        hex[i] = parseInt( identification.substr( i * 2, 2 ), 16 );
+    }
+    return hex;
+}
+
+function getIdentificationFromHex( hex ) {
+    var bit, identification = '';
+    for ( var i = 0; i < 16; i++ ) {
+        bit = hex[i];
+        if ( bit < 16 ) {
+            bit = '0' + bit.toString( 16 );
+        } else {
+            bit = bit.toString( 16 );
+        }
+        identification += bit;
+    }
+    return identification;
+}
+
+function getBufferFromString( string ) {
+    var buffer = new Uint8Array( string.length );
+    for ( var i = 0; i < string.length; i++ ) {
+        buffer[i] = string.charCodeAt(i);
+    }
+    return buffer;
 }
 
 function crypteCode( jsonCode, passphrase ) {
