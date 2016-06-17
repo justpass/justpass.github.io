@@ -316,6 +316,7 @@ body {
 
 .passphrase .inner .logo img {
     width: 256px;
+    height: 128px;
 }
 
 .passphrase input[type="password"] {
@@ -699,6 +700,7 @@ span:hover.tooltips span {
 #settings .pure-button {
     font-size: 14px;
     margin: 0;
+    display: inline-block;
 }
 
 #import,
