@@ -598,6 +598,8 @@ function loadXMLDoc( url, method, data, callback, fail ) {
         fail(null);
     }
 
+    xmlhttp.open( method, url, true );
+
     if (method === 'POST') {
         xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
     }
@@ -611,7 +613,6 @@ function loadXMLDoc( url, method, data, callback, fail ) {
             }
         }
     };
-    xmlhttp.open( method, url, true );
     xmlhttp.send( data );
 }
 
