@@ -187,6 +187,7 @@ body {
 #list .item .title,
 #list .item .account {
     text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 #main {
