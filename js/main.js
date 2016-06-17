@@ -393,9 +393,10 @@ var app = new Vue({
             document.getElementById( 'importImg' ).value = '';
         },
         shareXML: function() {
+            var scope = this;
             var api = 'https://jhe.li/jp/new';
             var xml = this.getKeychainXML();
-            loadXMLDoc( api, 'POST', 'xml=' + xml, function(result) {
+            loadXMLDoc( api, 'POST', 'xml=' + encodeURIComponent(xml), function(result) {
                 result = JSON.parse(result);
                 scope.$set( 'messagebox', '' );
                 scope.$set( 'message', 'Your share key is ' + result.id + ', and it\'s available within 5 minutes.' );
@@ -413,7 +414,7 @@ var app = new Vue({
             } )
         },
         syncXML: function() {
-            
+
         },
     },
     watch: {
@@ -596,6 +597,11 @@ function loadXMLDoc( url, method, data, callback, fail ) {
     } else {
         fail(null);
     }
+
+    if (method === 'POST') {
+        xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    }
+
     xmlhttp.onreadystatechange = function() {
         if ( xmlhttp.readyState === 4 ) {
             if ( xmlhttp.status === 200 ) {
