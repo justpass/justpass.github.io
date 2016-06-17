@@ -1,0 +1,14 @@
+CACHE MANIFEST
+/favicon.png
+/index.html
+
+/css/font-awesome.min.css
+/css/main.css
+/css/pure-min.css
+
+/js/aes.js
+/js/clipboard.min.js
+/js/main.js
+
+FALLBACK:
+/image/ offline.png
