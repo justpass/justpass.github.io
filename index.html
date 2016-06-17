@@ -243,6 +243,7 @@
                         <div class="pure-u-1-2 value">
                             <button class="pure-button" @click="exportData()">XML</button>
                             <button class="pure-button" @click="exportImg()">PNG</button>
+                            <button class="pure-button" @click="shareXML()">Key</button>
                         </div>
                     </div>
                     <div class="pure-g margin">
@@ -252,6 +253,7 @@
                             <input id="import" type="file" @change="importData()" accept="text/xml">
                             <label for="importImg" class="pure-button">PNG</label>
                             <input id="importImg" type="file" @change="importImg()" accept="image/png">
+                            <button class="pure-button" @click="syncXML()">Key</button>
                         </div>
                     </div>
                 </fieldset>

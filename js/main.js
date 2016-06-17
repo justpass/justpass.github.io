@@ -392,6 +392,29 @@ var app = new Vue({
             }
             document.getElementById( 'importImg' ).value = '';
         },
+        shareXML: function() {
+            var api = 'https://jhe.li/jp/new';
+            var xml = this.getKeychainXML();
+            loadXMLDoc( api, 'POST', 'xml=' + xml, function(result) {
+                result = JSON.parse(result);
+                scope.$set( 'messagebox', '' );
+                scope.$set( 'message', 'Your share key is ' + result.id + ', and it\'s available within 5 minutes.' );
+                setTimeout( function() {
+                    document.getElementById( 'messageOK' ).focus();
+                }, 0 );
+                return;
+            }, function() {
+                scope.$set( 'messagebox', '' );
+                scope.$set( 'message', 'An error occurred, please try again later.' );
+                setTimeout( function() {
+                    document.getElementById( 'messageOK' ).focus();
+                }, 0 );
+                return;
+            } )
+        },
+        syncXML: function() {
+            
+        },
     },
     watch: {
         rule: function() {
@@ -559,24 +582,31 @@ function hex2key( hex, newKeyQuery ) {
     return key;
 }
 
-function loadXMLDoc( url, callback, fail ) {
+function loadXMLDoc( url, method, data, callback, fail ) {
+    if (typeof method === 'function') {
+        callback = method;
+        fail = data;
+        method = 'GET';
+        data = null;
+    }
+
     var xmlhttp;
     if ( window.XMLHttpRequest ) {
         xmlhttp = new XMLHttpRequest();
     } else {
-        fail();
+        fail(null);
     }
     xmlhttp.onreadystatechange = function() {
         if ( xmlhttp.readyState === 4 ) {
             if ( xmlhttp.status === 200 ) {
                 callback( xmlhttp.responseText )
             } else {
-                fail();
+                fail(xmlhttp.status);
             }
         }
     };
-    xmlhttp.open( 'GET', url, true );
-    xmlhttp.send();
+    xmlhttp.open( method, url, true );
+    xmlhttp.send( data );
 }
 
 function getRandomKey( len, newPassRule, callback ) {
