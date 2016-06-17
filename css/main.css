@@ -184,6 +184,11 @@ body {
     background: #fff;
 }
 
+#list .item .title,
+#list .item .account {
+    text-overflow: ellipsis;
+}
+
 #main {
     height: 100%;
 }
