@@ -18,4 +18,4 @@ CACHE MANIFEST
 /js/main.js
 
 FALLBACK:
-/image/ offline.png
+/image/ /offline.png
