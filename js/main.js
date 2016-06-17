@@ -414,6 +414,7 @@ var app = new Vue({
             } );
         },
         syncXML: function() {
+            var scope = this;
             var id = prompt('Share Key');
             if (!id) {
                 return;
