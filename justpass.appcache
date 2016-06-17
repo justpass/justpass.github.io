@@ -6,6 +6,13 @@ CACHE MANIFEST
 /css/main.css
 /css/pure-min.css
 
+/font/fontawesome-webfont.eot
+/font/fontawesome-webfont.svg
+/font/fontawesome-webfont.ttf
+/font/fontawesome-webfont.woff
+/font/fontawesome-webfont.woff2
+/font/FontAwesome.otf
+
 /js/aes.js
 /js/clipboard.min.js
 /js/main.js
