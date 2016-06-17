@@ -396,8 +396,8 @@ var app = new Vue({
             var scope = this;
             var api = 'https://jhe.li/jp/new';
             var xml = this.getKeychainXML();
-            loadXMLDoc( api, 'POST', 'xml=' + encodeURIComponent(xml), function(result) {
-                result = JSON.parse(result);
+            loadXMLDoc( api, 'POST', 'xml=' + encodeURIComponent(xml), function( result ) {
+                result = JSON.parse( result );
                 scope.$set( 'messagebox', '' );
                 scope.$set( 'message', 'Your share key is ' + result.id + ', and it\'s available within 5 minutes.' );
                 setTimeout( function() {
@@ -411,10 +411,26 @@ var app = new Vue({
                     document.getElementById( 'messageOK' ).focus();
                 }, 0 );
                 return;
-            } )
+            } );
         },
         syncXML: function() {
+            var id = prompt('Share Key');
+            if (!id) {
+                return;
+            }
 
+            var url = 'https://jhe.li/jp/' + id;
+            loadXMLDoc( url, function( xml ) {
+                scope.readImportXML( xml );
+                return;
+            }, function() {
+                scope.$set( 'messagebox', '' );
+                scope.$set( 'message', 'An error occurred, please try again later.' );
+                setTimeout( function() {
+                    document.getElementById( 'messageOK' ).focus();
+                }, 0 );
+                return;
+            } );
         },
     },
     watch: {
