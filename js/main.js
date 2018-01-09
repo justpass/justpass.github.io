@@ -509,7 +509,9 @@ function decryptCode( passphrase ) {
     for ( var id in localStorage ) {
         if ( id !== 'identification' ) {
             var decryptedCode = CryptoJS.AES.decrypt( localStorage[id], passphrase ).toString( CryptoJS.enc.Utf8 );
-            keychain[id] = JSON.parse( decryptedCode );
+            if ( decryptedCode ) {
+                keychain[id] = JSON.parse( decryptedCode );
+            }
         }
     }
     app.$set( 'keychain', keychain );
